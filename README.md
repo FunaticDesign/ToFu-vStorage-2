@@ -1,6 +1,9 @@
 # ToFu_vStorage
 This mod adds some new barrels to DayZ which store items outside the DayZ database to increase server performance.
 
+This Mod is the open source version of my original mod:
+https://steamcommunity.com/sharedfiles/filedetails/?id=2810820431
+
 You need to create your own Textures for the Barrels.
 
 [![CC BY-NC-SA 4.0][cc-by-nc-sa-shield]][cc-by-nc-sa]
