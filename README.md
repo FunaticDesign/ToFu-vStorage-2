@@ -6,6 +6,8 @@ https://steamcommunity.com/sharedfiles/filedetails/?id=2810820431
 
 You need to create your own Textures for the Barrels cause the polygon camo texture in the workshop mod is licensed to me.
 
+I will provide no support for the this repro.
+
 [![CC BY-NC-SA 4.0][cc-by-nc-sa-shield]][cc-by-nc-sa]
 
 This work is licensed under a
