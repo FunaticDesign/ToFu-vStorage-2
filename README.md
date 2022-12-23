@@ -2,7 +2,7 @@
 This mod adds some new barrels to DayZ which store items outside the DayZ database to increase server performance.
 
 This Mod is the open source version of my original mod:
-https://steamcommunity.com/sharedfiles/filedetails/?id=2810820431 with some new features like autoclose (thanks inkihh) and a new personal quantum barrel (stores item player based).
+https://steamcommunity.com/sharedfiles/filedetails/?id=2810820431 with some new features like autoclose (thanks inkihh) and a new personal quantum barrel (stores items player based).
 
 You need to create your own Textures for the Barrels cause the polygon camo texture in the workshop mod is licensed to me.
 
