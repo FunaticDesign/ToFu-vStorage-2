@@ -4,7 +4,7 @@ This mod adds some new barrels to DayZ which store items outside the DayZ databa
 This Mod is the open source version of my original mod:
 https://steamcommunity.com/sharedfiles/filedetails/?id=2810820431
 
-You need to create your own Textures for the Barrels.
+You need to create your own Textures for the Barrels cause the polygon camo texture in the workshop mod is licensed to me.
 
 [![CC BY-NC-SA 4.0][cc-by-nc-sa-shield]][cc-by-nc-sa]
 
