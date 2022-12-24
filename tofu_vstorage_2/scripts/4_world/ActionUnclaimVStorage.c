@@ -21,23 +21,32 @@ class ActionUnclaimVStorage: ActionInteractBase
 			Barrel_ColorBase ntarget = Barrel_ColorBase.Cast( target_object );
 			if( ntarget )
 			{
-				if( !ntarget.IsLocked() && ntarget.IsOpen() )
+				
+				if(ntarget.GetType()=="tofu_vstorage_q_barrel_express")
 				{
+				
+					string steamid;
 					
-					if(ntarget.GetType()=="tofu_vstorage_q_barrel_express")
+					tofu_vstorage_barrel qbarrel = tofu_vstorage_barrel.Cast( target_object );
+					
+					if(GetGame().IsServer())
 					{
-						tofu_vstorage_barrel qbarrel = tofu_vstorage_barrel.Cast( target_object );
-						string steamid;
-						if(GetGame().IsServer())
-						{
-							steamid = player.GetIdentity().GetPlainId();
+						steamid = player.GetIdentity().GetPlainId();
+					}
+					else
+					{
+						if (GetGame().GetUserManager() && GetGame().GetUserManager().GetTitleInitiator()){
+							steamid = GetGame().GetUserManager().GetTitleInitiator().GetUid();
 						}
-						else
-						{
-							if (GetGame().GetUserManager() && GetGame().GetUserManager().GetTitleInitiator()){
-								steamid = GetGame().GetUserManager().GetTitleInitiator().GetUid();
-							}
-						}
+					}
+					
+					if(qbarrel.canInteractAdmin(steamid))
+					{
+						return true;
+					}
+					
+					if( !ntarget.IsLocked() && ntarget.IsOpen() )
+					{
 						
 						if(qbarrel.canInteract(steamid))
 						{
@@ -48,7 +57,6 @@ class ActionUnclaimVStorage: ActionInteractBase
 							return false;
 						}
 					}
-					
 				}
 			}
 		}

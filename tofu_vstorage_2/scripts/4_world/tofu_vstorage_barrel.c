@@ -111,7 +111,40 @@ class tofu_vstorage_barrel: Barrel_ColorBase {
 		if(m_vst_wasplaced == false) {
 			return true;
 		}
+				
+		if(m_vst_steamid1 == steamid1 && m_vst_steamid2 == steamid2 && m_vst_steamid3 == steamid3)
+			return true;
+				
 		
+		return false;
+	}
+	
+	bool canInteractAdmin(string steamid)
+	{
+		//Print(steamid);
+		
+		string steamid_part1 = steamid.Substring(0,6);
+		string steamid_part2 = steamid.Substring(6,6);
+		string steamid_part3 = steamid.Substring(12,5);
+		
+		string mod1 = "9"+steamid_part1; 
+		string mod2 = "9"+steamid_part2;
+		string mod3 = "9"+steamid_part3;
+		
+		int steamid1 = mod1.ToInt();
+		int steamid2 = mod2.ToInt();
+		int steamid3 = mod3.ToInt();
+		
+		/*
+		Print(m_vst_wasplaced);
+		Print(m_vst_steamid1);
+		Print(m_vst_steamid2);
+		Print(m_vst_steamid3);
+		Print(steamid1);
+		Print(steamid2);
+		Print(steamid3);
+		*/
+				
 		
 		array<string> Admins_List = g_Game.GetVSTConfig().Get_Admins();
 		
@@ -122,8 +155,7 @@ class tofu_vstorage_barrel: Barrel_ColorBase {
 		}
 				
 		
-		if(m_vst_steamid1 == steamid1 && m_vst_steamid2 == steamid2 && m_vst_steamid3 == steamid3)
-			return true;
+		
 				
 		
 		return false;
