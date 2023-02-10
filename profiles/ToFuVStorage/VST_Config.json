@@ -1,0 +1,24 @@
+{
+    "auto_close_random_seconds_min": 120,
+    "auto_close_random_seconds_max": 240,
+    "Blacklist": [
+        "WrittenNote",
+        "VehicleKeyBase",
+        "MCK_CarKey_Base",
+        "ChickenBreastMeat",
+        "GoatSteakMeat",
+        "SheepSteakMeat",
+        "PigSteakMeat",
+        "WolfSteakMeat",
+        "BearSteakMeat",
+        "DeerSteakMeat",
+        "CowSteakMeat",
+        "Lard",
+        "Carp",
+        "Mackerel",
+        "tofu_vstorage_barrel"
+    ],
+    "Admins": [
+        "1234567890"
+    ]
+}
