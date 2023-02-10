@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<types>
+	<type name="tofu_vstorage_barrel_ammo">
+		<lifetime>1209600</lifetime>
+		<flags count_in_cargo="0" count_in_hoarder="0" count_in_map="0" count_in_player="0" crafted="0" deloot="0" />
+	</type>
+	<type name="tofu_vstorage_barrel_clothing">
+		<lifetime>1209600</lifetime>
+		<flags count_in_cargo="0" count_in_hoarder="0" count_in_map="0" count_in_player="0" crafted="0" deloot="0" />
+	</type>
+	<type name="tofu_vstorage_barrel_base">
+		<lifetime>1209600</lifetime>
+		<flags count_in_cargo="0" count_in_hoarder="0" count_in_map="0" count_in_player="0" crafted="0" deloot="0" />
+	</type>
+	<type name="tofu_vstorage_barrel_other">
+		<lifetime>1209600</lifetime>
+		<flags count_in_cargo="0" count_in_hoarder="0" count_in_map="0" count_in_player="0" crafted="0" deloot="0" />
+	</type>
+	<type name="tofu_vstorage_barrel_food">
+		<lifetime>1209600</lifetime>
+		<flags count_in_cargo="0" count_in_hoarder="0" count_in_map="0" count_in_player="0" crafted="0" deloot="0" />
+	</type>
+	<type name="tofu_vstorage_barrel_medic">
+		<lifetime>1209600</lifetime>
+		<flags count_in_cargo="0" count_in_hoarder="0" count_in_map="0" count_in_player="0" crafted="0" deloot="0" />
+	</type>
+	<type name="tofu_vstorage_barrel_transport">
+		<lifetime>1209600</lifetime>
+		<flags count_in_cargo="0" count_in_hoarder="0" count_in_map="0" count_in_player="0" crafted="0" deloot="0" />
+	</type>
+	<type name="tofu_vstorage_barrel_important">
+		<lifetime>1209600</lifetime>
+		<flags count_in_cargo="0" count_in_hoarder="0" count_in_map="0" count_in_player="0" crafted="0" deloot="0" />
+	</type>
+	<type name="tofu_vstorage_barrel_event">
+		<lifetime>1209600</lifetime>
+		<flags count_in_cargo="0" count_in_hoarder="0" count_in_map="0" count_in_player="0" crafted="0" deloot="0" />
+	</type>
+	<type name="tofu_vstorage_barrel_tools">
+		<lifetime>1209600</lifetime>
+		<flags count_in_cargo="0" count_in_hoarder="0" count_in_map="0" count_in_player="0" crafted="0" deloot="0" />
+	</type>
+	<type name="tofu_vstorage_barrel_weapons">
+		<lifetime>1209600</lifetime>
+		<flags count_in_cargo="0" count_in_hoarder="0" count_in_map="0" count_in_player="0" crafted="0" deloot="0" />
+	</type>
+	<type name="tofu_vstorage_q_barrel_express">
+		<lifetime>1209600</lifetime>
+		<flags count_in_cargo="0" count_in_hoarder="0" count_in_map="0" count_in_player="0" crafted="0" deloot="0" />
+	</type>
+	
+		
+</types>
