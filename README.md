@@ -8,7 +8,7 @@ You need to create your own textures for the barrels cause the polygon camo text
 
 I will provide no support for the this repro.
 
-DO NOT REPACK THE ORIGINAL MOD, BUILD YOU OWN ONLY FROM THIS GITHUB
+DO NOT REPACK THE ORIGINAL MOD, BUILD YOUR OWN ONLY FROM THIS GITHUB
 
 [![CC BY-NC-SA 4.0][cc-by-nc-sa-shield]][cc-by-nc-sa]
 
