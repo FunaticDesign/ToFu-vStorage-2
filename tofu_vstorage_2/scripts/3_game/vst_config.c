@@ -58,9 +58,10 @@ class VST_Config
 		Blacklist.Insert("Lard");
 		Blacklist.Insert("Carp");
 		Blacklist.Insert("Mackerel");
+		Blacklist.Insert("tofu_vstorage_barrel");
 		
 		Admins = new array<string>;
-		Blacklist.Insert("76561198009118169");
+		Admins.Insert("12345678901234567");
 		
 		Save();
 	}
@@ -84,6 +85,7 @@ class VST_Config
 			Blacklist.Insert("Lard");
 			Blacklist.Insert("Carp");
 			Blacklist.Insert("Mackerel");
+			Blacklist.Insert("tofu_vstorage_barrel");
 		}
 		return Blacklist;
 	}
