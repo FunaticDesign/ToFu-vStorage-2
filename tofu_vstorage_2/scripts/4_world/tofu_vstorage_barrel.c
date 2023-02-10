@@ -179,7 +179,7 @@ class tofu_vstorage_barrel: Barrel_ColorBase {
 		{
 			int autoclose_timer = Math.RandomInt(m_auto_close_random_seconds_min, m_auto_close_random_seconds_max)*1000;
 			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(vst_timer_end, autoclose_timer, false);
-			Print("[vStorage] Starting " + autoclose_timer +" ms autoclose timer for " + GetType() + " at Position " +GetPosition() );
+			//Print("[vStorage] Starting " + autoclose_timer +" ms autoclose timer for " + GetType() + " at Position " +GetPosition() );
 		}
 		
 	}
@@ -206,11 +206,11 @@ class tofu_vstorage_barrel: Barrel_ColorBase {
 
 		if(!PlayerIsAround)
 		{
-			Print("[vStorage] No player(s) around, autoclosing now");
+			//Print("[vStorage] No player(s) around, autoclosing now");
 			vclose();
 		} else
 		{
-			Print("[vStorage] Player(s) around, not closing, restarting timer");
+			//Print("[vStorage] Player(s) around, not closing, restarting timer");
 			vst_timer_start();
 		}
 	}
@@ -421,7 +421,7 @@ class tofu_vstorage_barrel: Barrel_ColorBase {
 		string filename;
 		GetPersistentID(b1, b2, b3, b4);
 		
-		if(steamid == "")
+		if(this.GetType() != "tofu_vstorage_q_barrel_express")
 		{
 			filename = "container_"+b1+"_"+b2+"_"+b3+"_"+b4+".save";
 		}
@@ -441,7 +441,7 @@ class tofu_vstorage_barrel: Barrel_ColorBase {
 			}
 			openfile.Close();
 			
-			if(steamid != "")
+			if(this.GetType() == "tofu_vstorage_q_barrel_express")
 			{
 				if (FileExist("$profile:ToFuVStorage/"+filename)) {
 					DeleteFile("$profile:ToFuVStorage/"+filename);
@@ -462,8 +462,11 @@ class tofu_vstorage_barrel: Barrel_ColorBase {
 		
 		if(GetGame().IsDedicatedServer())
 		{
-			if(steamid == "")
+			if(this.GetType() != "tofu_vstorage_q_barrel_express")
+			{
 				vst_timer_start();
+				Print("[vStorage] Player "+steamid+" opened Barrel "+GetType()+" at position "+GetPosition());
+			}
 			//SoundSynchRemoteReset();
 		}
 		
@@ -486,7 +489,7 @@ class tofu_vstorage_barrel: Barrel_ColorBase {
 		GetPersistentID(b1, b2, b3, b4);
 		string persistentIdToSave = "container_" + b1 + "_" + b2 + "_" + b3 + "_" + b4;
 		
-		if(steamid == "")
+		if(this.GetType() != "tofu_vstorage_q_barrel_express")
 		{
 			filename = persistentIdToSave + ".save";
 		}

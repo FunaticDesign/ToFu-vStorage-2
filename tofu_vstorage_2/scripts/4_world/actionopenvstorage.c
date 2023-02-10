@@ -50,16 +50,9 @@ class ActionOpenVStorage: ActionInteractBase
 		
 
 		tofu_vstorage_barrel vbarrel = tofu_vstorage_barrel.Cast( target_object );
+		string steamid = action_data.m_Player.GetIdentity().GetPlainId();
+		vbarrel.vopen(steamid);
 		
-		if(vbarrel.GetType() == "tofu_vstorage_q_barrel_express")
-		{
-			string steamid = action_data.m_Player.GetIdentity().GetPlainId();
-			vbarrel.vopen(steamid);
-		}
-		else
-		{
-			vbarrel.vopen();
-		}
 		
 	}
 	
