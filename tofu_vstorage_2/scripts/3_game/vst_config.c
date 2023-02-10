@@ -43,7 +43,10 @@ class VST_Config
 	protected void Default()
     {
 		
-        Blacklist = new array<string>;
+        auto_close_random_seconds_min = 120;
+		auto_close_random_seconds_max = 240;
+		
+		Blacklist = new array<string>;
 		Blacklist.Insert("WrittenNote");
 		Blacklist.Insert("VehicleKeyBase");
 		Blacklist.Insert("MCK_CarKey_Base");
