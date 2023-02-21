@@ -2,13 +2,13 @@ class VST_Config
 {	
 		
 	static const string CONFIG_ROOT = "$profile:ToFuVStorage/";
-    static const string FULLPATH = "$profile:ToFuVStorage/VST_Config.json";
+    	static const string FULLPATH = "$profile:ToFuVStorage/VST_Config.json";
 	
-	private int auto_close_random_seconds_min = 120;
-	private int auto_close_random_seconds_max = 240;
+	protected int auto_close_random_seconds_min = 120;
+	protected int auto_close_random_seconds_max = 240;
 
-	private ref array<string> Blacklist;
-	private ref array<string> Admins;
+	protected ref array<string> Blacklist;
+	protected ref array<string> Admins;
 	
 	void VST_Config()
 	{
