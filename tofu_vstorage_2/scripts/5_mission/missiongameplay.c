@@ -11,8 +11,11 @@ modded class MissionGameplay
         ref Param1<ref VST_Config> data;
         if (type == CallType.Client)
 		{
+			//Print("[vStorage] I AM CLIENT !!!");
 			if (!ctx.Read(data)) return;
+			//Print("[vStorage] GOT DATA "+data.param1);
 			g_Game.SetVSTConfig( data.param1 );			
 		}
+		
     }
 };

@@ -23,7 +23,10 @@ class tofu_vstorage_barrel: Barrel_ColorBase {
 		RegisterNetSyncVariableInt( "m_vst_steamid3" );
 		RegisterNetSyncVariableBool( "m_vst_wasplaced" );
 
-		m_BlackListItems = g_Game.GetVSTConfig().Get_Blacklist();
+		//m_BlackListItems = g_Game.GetVSTConfig().Get_Blacklist();
+		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(ladeConfig, 30000, false);
+		
+		//Print("[vStorage] m_BlackListItems: "+m_BlackListItems);
 
 		m_auto_close_random_seconds_min = g_Game.GetVSTConfig().Get_auto_close_random_seconds_min();
 		m_auto_close_random_seconds_max = g_Game.GetVSTConfig().Get_auto_close_random_seconds_max();
@@ -32,12 +35,17 @@ class tofu_vstorage_barrel: Barrel_ColorBase {
 		{
 			if(GetType() != "tofu_vstorage_q_barrel_express")
 			{
-				//Print("[vStorage] scheduling open/close check in 60 sec.");
+				Print("[vStorage] scheduling open/close check in 60 sec.");
 				GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(vst_timer_start, 60000, false);
 			}
 			
 		}
 			
+	}
+	
+	void ladeConfig()
+	{
+		m_BlackListItems = g_Game.GetVSTConfig().Get_Blacklist();
 	}
 	
 	override void OnPlacementComplete( Man player, vector position = "0 0 0", vector orientation = "0 0 0" )
@@ -155,9 +163,6 @@ class tofu_vstorage_barrel: Barrel_ColorBase {
 		}
 				
 		
-		
-				
-		
 		return false;
 	}
 	
@@ -179,7 +184,7 @@ class tofu_vstorage_barrel: Barrel_ColorBase {
 		{
 			int autoclose_timer = Math.RandomInt(m_auto_close_random_seconds_min, m_auto_close_random_seconds_max)*1000;
 			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(vst_timer_end, autoclose_timer, false);
-			//Print("[vStorage] Starting " + autoclose_timer +" ms autoclose timer for " + GetType() + " at Position " +GetPosition() );
+			Print("[vStorage] Starting " + autoclose_timer +" ms autoclose timer for " + GetType() + " at Position " +GetPosition() );
 		}
 		
 	}
@@ -206,11 +211,11 @@ class tofu_vstorage_barrel: Barrel_ColorBase {
 
 		if(!PlayerIsAround)
 		{
-			//Print("[vStorage] No player(s) around, autoclosing now");
+			Print("[vStorage] No player(s) around, autoclosing now");
 			vclose();
 		} else
 		{
-			//Print("[vStorage] Player(s) around, not closing, restarting timer");
+			Print("[vStorage] Player(s) around, not closing, restarting timer");
 			vst_timer_start();
 		}
 	}
@@ -282,8 +287,11 @@ class tofu_vstorage_barrel: Barrel_ColorBase {
 	
 	bool vst_IsOnBlacklist(EntityAI item)
 	{
-		if(!m_BlackListItems || m_BlackListItems.Count() == 0)
+		if(!m_BlackListItems || m_BlackListItems.Count() == 0) {
+			//Print("[vStorage] m_BlackListItems array nicht bekannt oder leer ");
 			return false;
+		}
+			
 
 		int i;
 		string BlackListClass;
@@ -291,8 +299,12 @@ class tofu_vstorage_barrel: Barrel_ColorBase {
 		for (i = 0; i < m_BlackListItems.Count(); i++)
 		{
 			BlackListClass = m_BlackListItems.Get(i);
-			if(item.IsKindOf(BlackListClass))
+			if(item.IsKindOf(BlackListClass)) 
+			{
+				//Print("[vStorage] Found Item "+BlackListClass+" IN blacklist");
 				return true;
+			}
+			
 		}
 
 		array<EntityAI> items_in_storage = new array<EntityAI>;
@@ -304,9 +316,13 @@ class tofu_vstorage_barrel: Barrel_ColorBase {
 		{
 			item_in_storage = items_in_storage.Get(i);
 			if (item_in_storage && vst_IsOnBlacklist(item_in_storage))
+			{
+				//Print("[vStorage] Found Child Item "+BlackListClass+" IN blacklist");
 				return true;
+			}
 		};
 
+		//Print("[vStorage] ITEM "+item+" IS NOT ON BLACKLIST");
 		return false;
 	}
 

@@ -1,12 +1,12 @@
 modded class DayZGame
 {	
-	private ref VST_Config m_VST_Config;
+	protected ref VST_Config m_VST_Config;
 	
     ref VST_Config GetVSTConfig()
     {
         if (!m_VST_Config)
         {
-            SetVSTConfig(new VST_Config);
+			SetVSTConfig(new VST_Config);
         }
         
 	    return m_VST_Config;
@@ -14,6 +14,7 @@ modded class DayZGame
 
     void SetVSTConfig(VST_Config config)
 	{
+		//Print("[vStorage] Setting config: "+config);
 		m_VST_Config = config;
 	}
     

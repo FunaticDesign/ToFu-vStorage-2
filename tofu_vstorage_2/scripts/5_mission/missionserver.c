@@ -1,6 +1,6 @@
 modded class MissionServer
 {
-	private ref VST_Config m_VST_Config;
+	ref VST_Config m_VST_Config;
 	
 	void MissionServer()
 	{
