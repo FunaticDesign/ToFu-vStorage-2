@@ -48,6 +48,22 @@
 		<lifetime>1209600</lifetime>
 		<flags count_in_cargo="0" count_in_hoarder="0" count_in_map="0" count_in_player="0" crafted="0" deloot="0" />
 	</type>
+	<type name="tofu_vstorage_barrel_drugs">
+		<lifetime>1209600</lifetime>
+		<flags count_in_cargo="0" count_in_hoarder="0" count_in_map="0" count_in_player="0" crafted="0" deloot="0" />
+	</type>
+	<type name="tofu_vstorage_barrel_donations">
+		<lifetime>1209600</lifetime>
+		<flags count_in_cargo="0" count_in_hoarder="0" count_in_map="0" count_in_player="0" crafted="0" deloot="0" />
+	</type>
+	<type name="tofu_vstorage_barrel_gardening">
+		<lifetime>1209600</lifetime>
+		<flags count_in_cargo="0" count_in_hoarder="0" count_in_map="0" count_in_player="0" crafted="0" deloot="0" />
+	</type>
+	<type name="tofu_vstorage_barrel_attachments">
+		<lifetime>1209600</lifetime>
+		<flags count_in_cargo="0" count_in_hoarder="0" count_in_map="0" count_in_player="0" crafted="0" deloot="0" />
+	</type>
 	
 		
 </types>
