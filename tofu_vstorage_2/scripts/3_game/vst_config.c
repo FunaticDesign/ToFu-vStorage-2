@@ -73,7 +73,6 @@ class VST_Config
 
 	array<string> Get_Blacklist()
 	{
-		//Print("[vStorage] Blacklist: "+Blacklist);
 		return Blacklist;
 	}
 	
