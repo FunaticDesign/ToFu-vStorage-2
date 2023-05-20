@@ -1,32 +1,34 @@
-class tofu_vstorage_barrel: Barrel_ColorBase {
+class tofu_vstorage_barrel: Barrel_Red {
 	
-	protected bool m_vst_hasitems = false;
-	protected int m_vst_steamid1 	= 0;
-	protected int m_vst_steamid2 	= 0;
-	protected int m_vst_steamid3 	= 0;
-	protected bool m_vst_wasplaced 	= false;
+	protected bool m_vst_hasitems;
+	protected int m_vst_steamid1;
+	protected int m_vst_steamid2;
+	protected int m_vst_steamid3;
+	protected bool m_vst_wasplaced;
 	
-	protected int m_didVStorage = false;	
+	protected int m_didVStorage;	
 	
 	protected int m_auto_close_random_seconds_min;
 	protected int m_auto_close_random_seconds_max;
 
-	protected ref array<string> m_BlackListItems;
+	//protected ref array<string> m_BlackListItems;
 
 	
 
 	void tofu_vstorage_barrel()
 	{
+		m_vst_steamid1 	= 0;
+		m_vst_steamid2 	= 0;
+		m_vst_steamid3 	= 0;
+		m_vst_wasplaced = false;
+		
+		m_didVStorage = false;	
+				
 		RegisterNetSyncVariableBool( "m_vst_hasitems" );
 		RegisterNetSyncVariableInt( "m_vst_steamid1" );
 		RegisterNetSyncVariableInt( "m_vst_steamid2" );
 		RegisterNetSyncVariableInt( "m_vst_steamid3" );
 		RegisterNetSyncVariableBool( "m_vst_wasplaced" );
-
-		//m_BlackListItems = g_Game.GetVSTConfig().Get_Blacklist();
-		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(ladeConfig, 30000, false);
-		
-		//Print("[vStorage] m_BlackListItems: "+m_BlackListItems);
 
 		m_auto_close_random_seconds_min = g_Game.GetVSTConfig().Get_auto_close_random_seconds_min();
 		m_auto_close_random_seconds_max = g_Game.GetVSTConfig().Get_auto_close_random_seconds_max();
@@ -35,7 +37,7 @@ class tofu_vstorage_barrel: Barrel_ColorBase {
 		{
 			if(GetType() != "tofu_vstorage_q_barrel_express")
 			{
-				Print("[vStorage] scheduling open/close check in 60 sec.");
+				//Print("[vStorage] scheduling open/close check in 60 sec.");
 				GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(vst_timer_start, 60000, false);
 			}
 			
@@ -43,10 +45,13 @@ class tofu_vstorage_barrel: Barrel_ColorBase {
 			
 	}
 	
+	/*
 	void ladeConfig()
 	{
 		m_BlackListItems = g_Game.GetVSTConfig().Get_Blacklist();
 	}
+	*/
+	
 	
 	override void OnPlacementComplete( Man player, vector position = "0 0 0", vector orientation = "0 0 0" )
 	{
@@ -54,7 +59,7 @@ class tofu_vstorage_barrel: Barrel_ColorBase {
 		if(GetGame().IsServer())
 		{
 			string steamid = player.GetIdentity().GetPlainId();
-			Print("[vStorage] player "+steamid+ "placed barrel");
+			//Print("[vStorage] player "+steamid+ "placed barrel");
 			//string steamid_part1 = "999999";
 			string steamid_part1 = steamid.Substring(0,6);
 			string steamid_part2 = steamid.Substring(6,6);
@@ -62,6 +67,7 @@ class tofu_vstorage_barrel: Barrel_ColorBase {
 			saveSteamid(steamid_part1,steamid_part2,steamid_part3);
 		}
 	}
+	
 	
 	void saveSteamid(string a, string b, string c) {
 				
@@ -161,7 +167,6 @@ class tofu_vstorage_barrel: Barrel_ColorBase {
 			if(steamid == Admins_List.Get(i))
 				return true;
 		}
-				
 		
 		return false;
 	}
@@ -184,7 +189,7 @@ class tofu_vstorage_barrel: Barrel_ColorBase {
 		{
 			int autoclose_timer = Math.RandomInt(m_auto_close_random_seconds_min, m_auto_close_random_seconds_max)*1000;
 			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(vst_timer_end, autoclose_timer, false);
-			Print("[vStorage] Starting " + autoclose_timer +" ms autoclose timer for " + GetType() + " at Position " +GetPosition() );
+			//Print("[vStorage] Starting " + autoclose_timer +" ms autoclose timer for " + GetType() + " at Position " +GetPosition() );
 		}
 		
 	}
@@ -211,11 +216,11 @@ class tofu_vstorage_barrel: Barrel_ColorBase {
 
 		if(!PlayerIsAround)
 		{
-			Print("[vStorage] No player(s) around, autoclosing now");
+			//Print("[vStorage] No player(s) around, autoclosing now");
 			vclose();
 		} else
 		{
-			Print("[vStorage] Player(s) around, not closing, restarting timer");
+			//Print("[vStorage] Player(s) around, not closing, restarting timer");
 			vst_timer_start();
 		}
 	}
@@ -287,18 +292,21 @@ class tofu_vstorage_barrel: Barrel_ColorBase {
 	
 	bool vst_IsOnBlacklist(EntityAI item)
 	{
+		
+		/*
 		if(!m_BlackListItems || m_BlackListItems.Count() == 0) {
 			//Print("[vStorage] m_BlackListItems array nicht bekannt oder leer ");
 			return false;
 		}
+		*/
 			
 
 		int i;
 		string BlackListClass;
 
-		for (i = 0; i < m_BlackListItems.Count(); i++)
+		for (i = 0; i < g_Game.GetVSTConfig().Get_Blacklist().Count(); i++)
 		{
-			BlackListClass = m_BlackListItems.Get(i);
+			BlackListClass = g_Game.GetVSTConfig().Get_Blacklist().Get(i);
 			if(item.IsKindOf(BlackListClass)) 
 			{
 				//Print("[vStorage] Found Item "+BlackListClass+" IN blacklist");
@@ -665,7 +673,7 @@ class tofu_vstorage_barrel: Barrel_ColorBase {
 					itemWpnBarrelInfo += a_itemWpnBarrelInfo.Get(bi)+"|";
 				}
 				itemObj.itemWpnBarrelInfo = itemWpnBarrelInfo;
-				Print(itemWpnBarrelInfo);
+				//Print(itemWpnBarrelInfo);
 			}
 			
 			if(a_itemWpnInternalMagInfo.Count() > 0)
@@ -675,7 +683,7 @@ class tofu_vstorage_barrel: Barrel_ColorBase {
 					itemWpnInternalMagInfo += a_itemWpnInternalMagInfo.Get(im)+"|";
 				}
 				itemObj.itemWpnInternalMagInfo = itemWpnInternalMagInfo;
-				Print(itemWpnInternalMagInfo);
+				//Print(itemWpnInternalMagInfo);
 			}
 		}
 		
@@ -957,7 +965,7 @@ class tofu_vstorage_barrel: Barrel_ColorBase {
 													
 							if ( magazine_check2.ServerStoreCartridge(0.0, a_part_itemMagInfo[1]))
 							{
-								Print("Stored Ammo in Mag");
+								//Print("Stored Ammo in Mag");
 							}
 						}
 					}
