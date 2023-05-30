@@ -35,14 +35,31 @@ class tofu_vstorage_barrel: Barrel_Red {
 
 		if(GetGame().IsDedicatedServer())
 		{
-			if(GetType() != "tofu_vstorage_q_barrel_express")
+			
+			string vstoreClassName = GetType();
+			
+			if(vstoreClassName != "tofu_vstorage_q_barrel_express")
 			{
-				//Print("[vStorage] scheduling open/close check in 60 sec.");
+				if(g_Game.GetVSTConfig().Get_script_logging() == 1)
+					Print("[vStorage] scheduling open/close check in 60 sec.");
+				
 				GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(vst_timer_start, 60000, false);
+				if(vstoreClassName.Contains("_1000"))
+				{
+					GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(vstorageLifeRefresh, 30000, false, EntityAI.Cast(this));
+				}
+					
 			}
 			
 		}
 			
+	}
+	
+	void vstorageLifeRefresh(EntityAI ent)
+	{
+		if(g_Game.GetVSTConfig().Get_script_logging() == 1)
+			Print("[vStorage] Auto set Lifetime of "+ent.GetType()+" at pos "+ent.GetPosition());
+		SetLifetime(3888000);
 	}
 	
 	/*
@@ -59,7 +76,9 @@ class tofu_vstorage_barrel: Barrel_Red {
 		if(GetGame().IsServer())
 		{
 			string steamid = player.GetIdentity().GetPlainId();
-			//Print("[vStorage] player "+steamid+ "placed barrel");
+			if(g_Game.GetVSTConfig().Get_script_logging() == 1)
+				Print("[vStorage] player "+steamid+ "placed barrel "+GetType()+" at pos "+GetPosition());
+			
 			//string steamid_part1 = "999999";
 			string steamid_part1 = steamid.Substring(0,6);
 			string steamid_part2 = steamid.Substring(6,6);
@@ -189,7 +208,8 @@ class tofu_vstorage_barrel: Barrel_Red {
 		{
 			int autoclose_timer = Math.RandomInt(m_auto_close_random_seconds_min, m_auto_close_random_seconds_max)*1000;
 			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(vst_timer_end, autoclose_timer, false);
-			//Print("[vStorage] Starting " + autoclose_timer +" ms autoclose timer for " + GetType() + " at Position " +GetPosition() );
+			if(g_Game.GetVSTConfig().Get_script_logging() == 1)
+				Print("[vStorage] Starting " + autoclose_timer +" ms autoclose timer for " + GetType() + " at Position " +GetPosition() );
 		}
 		
 	}
@@ -216,11 +236,15 @@ class tofu_vstorage_barrel: Barrel_Red {
 
 		if(!PlayerIsAround)
 		{
-			//Print("[vStorage] No player(s) around, autoclosing now");
+			if(g_Game.GetVSTConfig().Get_script_logging() == 1)
+				Print("[vStorage] No player(s) around, autoclosing "+GetType()+" at pos "+GetPosition());
+			
 			vclose();
 		} else
 		{
-			//Print("[vStorage] Player(s) around, not closing, restarting timer");
+			if(g_Game.GetVSTConfig().Get_script_logging() == 1)
+				Print("[vStorage] Player(s) around near "+GetType()+" at pos "+GetPosition()+", not closing, restarting timer");
+			
 			vst_timer_start();
 		}
 	}
@@ -341,14 +365,32 @@ class tofu_vstorage_barrel: Barrel_Red {
 	
 	override bool CanPutInCargo( EntityAI parent )
 	{
+		string steamid;
+		
 		if(IsOpen() || m_vst_hasitems)
 			return false;
 		
 		
+		if(GetType().Contains("_1000"))
+		{
+			if(GetGame().IsServer())
+			{
+				steamid = PlayerBase.Cast(parent).GetIdentity().GetPlainId();
+			}
+			else
+			{
+				if (GetGame().GetUserManager() && GetGame().GetUserManager().GetTitleInitiator()){
+					steamid = GetGame().GetUserManager().GetTitleInitiator().GetUid();
+				}
+			}
+			
+			return canInteractAdmin(steamid);
+		}
+		
 		if(GetType() == "tofu_vstorage_q_barrel_express")
 		{
 		
-			string steamid;
+			
 			if(GetGame().IsServer())
 			{
 				steamid = PlayerBase.Cast(parent).GetIdentity().GetPlainId();
@@ -378,8 +420,26 @@ class tofu_vstorage_barrel: Barrel_Red {
 	override bool CanPutIntoHands( EntityAI parent )
 	{
 		
+		string steamid;
+		
 		if(IsOpen()) 
 			return false;
+		
+		if(GetType().Contains("_1000"))
+		{
+			if(GetGame().IsServer())
+			{
+				steamid = PlayerBase.Cast(parent).GetIdentity().GetPlainId();
+			}
+			else
+			{
+				if (GetGame().GetUserManager() && GetGame().GetUserManager().GetTitleInitiator()){
+					steamid = GetGame().GetUserManager().GetTitleInitiator().GetUid();
+				}
+			}
+			
+			return canInteractAdmin(steamid);
+		}
 			
 		
 		// If Base nearby and barrel is closed allow take to hands
@@ -406,7 +466,6 @@ class tofu_vstorage_barrel: Barrel_Red {
 		if(GetType() == "tofu_vstorage_q_barrel_express")
 		{
 						
-			string steamid;
 			if(GetGame().IsServer())
 			{
 				steamid = PlayerBase.Cast(parent).GetIdentity().GetPlainId();
@@ -489,7 +548,9 @@ class tofu_vstorage_barrel: Barrel_Red {
 			if(this.GetType() != "tofu_vstorage_q_barrel_express")
 			{
 				vst_timer_start();
-				Print("[vStorage] Player "+steamid+" opened Barrel "+GetType()+" at position "+GetPosition());
+				
+				if(g_Game.GetVSTConfig().Get_script_logging() == 1)
+					Print("[vStorage] Player "+steamid+" opened Barrel "+GetType()+" at position "+GetPosition());
 			}
 			//SoundSynchRemoteReset();
 		}
@@ -807,9 +868,20 @@ class tofu_vstorage_barrel: Barrel_Red {
 							magazine_check.SetSynchDirty();
 							
 							ItemBase mag_stats = ItemBase.Cast(item_in_storage);
-							mag_stats.SetHealth(item.itemHealth);
+							
+							if(ntarget.GetType() != "tofu_vstorage_barrel_repair" && ntarget.GetType() != "tofu_vstorage_barrel_repair_1000")
+							{
+								mag_stats.SetHealth(item.itemHealth);
+							}
+							else
+							{
+								mag_stats.SetHealth(mag_stats.GetMaxHealth());
+							}
+							
 							mag_stats.SetTemperature(item.itemTemp);
-							mag_stats.SetWet(item.itemWetness);
+							
+							if(ntarget.GetType() != "tofu_vstorage_barrel_drying" && ntarget.GetType() != "tofu_vstorage_barrel_drying_1000")
+								mag_stats.SetWet(item.itemWetness);
 						}
 					}
 				}
@@ -840,9 +912,20 @@ class tofu_vstorage_barrel: Barrel_Red {
 						magazine_check3.SetSynchDirty();
 						
 						ItemBase mag_stats2 = ItemBase.Cast(new_item);
-						mag_stats2.SetHealth(item.itemHealth);
+						
+						if(ntarget.GetType() != "tofu_vstorage_barrel_repair" && ntarget.GetType() != "tofu_vstorage_barrel_repair_1000")
+						{
+							mag_stats2.SetHealth(item.itemHealth);
+						}
+						else
+						{
+							mag_stats2.SetHealth(mag_stats2.GetMaxHealth());
+						}
+						
 						mag_stats2.SetTemperature(item.itemTemp);
-						mag_stats2.SetWet(item.itemWetness);
+						
+						if(ntarget.GetType() != "tofu_vstorage_barrel_drying" && ntarget.GetType() != "tofu_vstorage_barrel_drying_1000")
+							mag_stats2.SetWet(item.itemWetness);
 					}
 					
 				} else {
@@ -978,9 +1061,19 @@ class tofu_vstorage_barrel: Barrel_Red {
 				new_item_food.ChangeFoodStage(item.itemFoodstage);
 			}
 
-			new_item.SetHealth(item.itemHealth);
+			if(ntarget.GetType() != "tofu_vstorage_barrel_repair" && ntarget.GetType() != "tofu_vstorage_barrel_repair_1000")
+			{
+				new_item.SetHealth(item.itemHealth);
+			}
+			else
+			{
+				new_item.SetHealth(new_item.GetMaxHealth());
+			}
+			
 			new_item.SetTemperature(item.itemTemp);
-			new_item.SetWet(item.itemWetness);
+			
+			if(ntarget.GetType() != "tofu_vstorage_barrel_drying" && ntarget.GetType() != "tofu_vstorage_barrel_drying_1000")
+				new_item.SetWet(item.itemWetness);
 			
 			foreach(tofuvStorageObj childitem : item.itemChildren) {
 				vrestore(childitem, new_item);
