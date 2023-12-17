@@ -43,10 +43,10 @@ class tofu_vstorage_barrel: Barrel_Red {
 				if(g_Game.GetVSTConfig().Get_script_logging() == 1)
 					Print("[vStorage] scheduling open/close check in 60 sec.");
 				
-				GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(vst_timer_start, 60000, false);
+				GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(vst_timer_start, 60000, false, false);
 				if(vstoreClassName.Contains("_1000"))
 				{
-					GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(vstorageLifeRefresh, 30000, false, EntityAI.Cast(this));
+					GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(vstorageLifeRefresh, 30000, false, this);
 				}
 					
 			}
@@ -199,14 +199,22 @@ class tofu_vstorage_barrel: Barrel_Red {
 		SetSynchDirty();
 	}
 
-	void vst_timer_start()
+	void vst_timer_start(bool express = false)
 	{
 		if(!(m_auto_close_random_seconds_min > 0 && m_auto_close_random_seconds_max > 0 && m_auto_close_random_seconds_min < m_auto_close_random_seconds_max))
 			return;
 
 		if(IsOpen())
 		{
-			int autoclose_timer = Math.RandomInt(m_auto_close_random_seconds_min, m_auto_close_random_seconds_max)*1000;
+			int autoclose_timer;
+			if(express)
+			{
+				autoclose_timer = 20*1000;
+			}
+			else
+			{
+				autoclose_timer = Math.RandomInt(m_auto_close_random_seconds_min, m_auto_close_random_seconds_max)*1000;
+			}
 			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(vst_timer_end, autoclose_timer, false);
 			if(g_Game.GetVSTConfig().Get_script_logging() == 1)
 				Print("[vStorage] Starting " + autoclose_timer +" ms autoclose timer for " + GetType() + " at Position " +GetPosition() );
@@ -245,7 +253,7 @@ class tofu_vstorage_barrel: Barrel_Red {
 			if(g_Game.GetVSTConfig().Get_script_logging() == 1)
 				Print("[vStorage] Player(s) around near "+GetType()+" at pos "+GetPosition()+", not closing, restarting timer");
 			
-			vst_timer_start();
+			vst_timer_start(false);
 		}
 	}
 
@@ -495,8 +503,12 @@ class tofu_vstorage_barrel: Barrel_Red {
 		return false;
 	}
 
-	void vopen(string steamid = "")
+	bool vopen(PlayerBase player, string steamid = "")
 	{
+		
+		
+		bool failedItems = false;
+		
 		int b1;
 		int b2;
 		int b3;
@@ -514,17 +526,18 @@ class tofu_vstorage_barrel: Barrel_Red {
 		}
 		
 		FileSerializer openfile = new FileSerializer();
-		autoptr tofuvStorageContainer loadedContainerObj;
+		tofuvStorageContainer loadedContainerObj = new tofuvStorageContainer() ;
 		
 		if (openfile.Open("$profile:ToFuVStorage/" + filename, FileMode.READ)) {
 			if(openfile.Read(loadedContainerObj)) {
 				foreach(tofuvStorageObj item : loadedContainerObj.storedItems) {
-					vrestore(item, this);
+					if(!vrestore(item, this, player))
+						failedItems = true;
 				}
 			}
 			openfile.Close();
 			
-			if(this.GetType() == "tofu_vstorage_q_barrel_express")
+			if(this.GetType() == "tofu_vstorage_q_barrel_express" || this.GetType() == "tofu_vstorage_q_barrel_travel")
 			{
 				if (FileExist("$profile:ToFuVStorage/"+filename)) {
 					DeleteFile("$profile:ToFuVStorage/"+filename);
@@ -547,15 +560,24 @@ class tofu_vstorage_barrel: Barrel_Red {
 		{
 			if(this.GetType() != "tofu_vstorage_q_barrel_express")
 			{
-				vst_timer_start();
+				vst_timer_start(false);
 				
 				if(g_Game.GetVSTConfig().Get_script_logging() == 1)
 					Print("[vStorage] Player "+steamid+" opened Barrel "+GetType()+" at position "+GetPosition());
 			}
+			
 			//SoundSynchRemoteReset();
 		}
 		
+		if(failedItems) 
+		{
+			SetSynchDirty();
+			return false;
+		}
+		
+		
 		SetSynchDirty();
+		return true;
 		
 	}
 
@@ -805,35 +827,137 @@ class tofu_vstorage_barrel: Barrel_Red {
 		return itemObj;
 	}
 	
-	void vrestore(tofuvStorageObj item, Object target_object)
+	bool vrestore(tofuvStorageObj item, Object target_object, PlayerBase player)
 	{
+		
+		
+		bool itemFailed = false;
+		bool indexError = false;
+		
 		EntityAI ntarget = EntityAI.Cast( target_object );
 		ItemBase new_item;
-		
+	
 		if(item.itemSlotId == -1) {
-			//Print("[vStorage] Try Creating " + item.itemName + " in Parent " + ntarget.GetType());
 			
-			new_item = ItemBase.Cast(ntarget.GetInventory().CreateEntityInCargoEx(item.itemName,item.itemIdx,item.itemRow,item.itemCol,item.itemFliped));
+			if(g_Game.GetVSTConfig().Get_script_logging() == 1)
+			{
+				Print("[vStorage] Try Creating " + item.itemName + " in Parent " + ntarget.GetType());
+				Print("[vStorage] Try " + item.itemIdx + " item.itemIdx ");
+				Print("[vStorage] Try " + item.itemRow + " item.itemRow ");
+				Print("[vStorage] Try " + item.itemCol + " item.itemCol ");
+				Print("[vStorage] Try " + item.itemFliped + " item.itemFliped ");
+			}
+			
+				
+			GameInventory safty_iventory = GameInventory.Cast(ntarget.GetInventory());
+			if(safty_iventory)
+			{
+				if(g_Game.GetVSTConfig().Get_script_logging() == 1)
+					Print("[vStorage] safty_iventory okay");
+				
+				
+				if(item.itemIdx == -1)
+				{
+					if(g_Game.GetVSTConfig().Get_script_logging() == 1)
+						Print("[vStorage] !!!!!!!!!!!!!!item.itemIdx -1, Abort");
+					
+					indexError = true;
+				}
+				
+				if(item.itemRow == -1)
+				{
+					if(g_Game.GetVSTConfig().Get_script_logging() == 1)
+						Print("[vStorage] !!!!!!!!!!!!item.itemRow -1, Abort");
+					
+					indexError = true;
+				}
+				
+				if(item.itemCol == -1)
+				{
+					if(g_Game.GetVSTConfig().Get_script_logging() == 1)
+						Print("[vStorage] !!!!!!!!!!!!item.itemCol -1, Abort");
+					
+					indexError = true;
+				}
+				
+				if(!indexError)				
+				{	
+					new_item = ItemBase.Cast(safty_iventory.CreateEntityInCargoEx(item.itemName,item.itemIdx,item.itemRow,item.itemCol,item.itemFliped));
+				}
+				else
+				{
+					new_item = ItemBase.Cast(GetGame().CreateObject(item.itemName, ntarget.GetPosition(),false,false,true));
+					if(!new_item)
+					{
+						Print("[vStorage] !!!!!!!!Failed creating Item "+item.itemName+" "+new_item+" on ground.");
+						return false;
+					}
+					else
+					{
+						if(g_Game.GetVSTConfig().Get_script_logging() == 1)
+							Print("[vStorage] Item "+item.itemName+" "+new_item+" created on ground.");
+					}
+				}
+			}
+			else
+			{
+				if(g_Game.GetVSTConfig().Get_script_logging() == 1)
+					Print("[vStorage] !!!!!!!!!!!!!! Failed casting Inventory");
+				
+				return false;
+			}
+			
+			
+			
+						
+			
+			
 			if(new_item) {
-				//Print("[vStorage] Item Created");
+				if(g_Game.GetVSTConfig().Get_script_logging() == 1)
+					Print("[vStorage] Item "+item.itemName+" "+new_item+" Created, preparing to set properties.");
 			} else {
-				//Print("[vStorage] Item NOT created, try alternative way");
+				if(g_Game.GetVSTConfig().Get_script_logging() == 1)
+					Print("[vStorage] Item "+item.itemName+" "+new_item+" NOT created, try alternative way");
+				
+				
 				GameInventory testinv = ntarget.GetInventory();
 				if(!testinv) {
-					//Print("[vStorage] No Inventory found");
+					if(g_Game.GetVSTConfig().Get_script_logging() == 1)
+						Print("[vStorage] No Inventory found for Item "+item.itemName+" "+new_item+"");
 				} else {
 					testinv.UnlockInventory(HIDE_INV_FROM_SCRIPT);   
-					ItemBase new_item_retry = ItemBase.Cast(testinv.CreateEntityInCargoEx(item.itemName,item.itemIdx,item.itemRow,item.itemCol,item.itemFliped));
-					if(new_item_retry) {
-						//Print("[vStorage] Item created in retry");
+					new_item = ItemBase.Cast(testinv.CreateEntityInCargoEx(item.itemName,item.itemIdx,item.itemRow,item.itemCol,item.itemFliped));
+					if(new_item) {
+						if(g_Game.GetVSTConfig().Get_script_logging() == 1)
+							Print("[vStorage] Item "+item.itemName+" "+new_item+" created in retry");
 					} else {
-						//Print("[vStorage] Item NOT created in retry");
+						if(g_Game.GetVSTConfig().Get_script_logging() == 1)
+							Print("[vStorage] Item "+item.itemName+" "+new_item+" NOT created in retry");
+						
+						new_item = ItemBase.Cast(GetGame().CreateObject(item.itemName, ntarget.GetPosition(),false,false,true));
+						if(!new_item)
+						{
+							Print("[vStorage] !!!!!!!!Failed creating Item "+item.itemName+" "+new_item+" on ground.");
+							return false;
+						}
+						else
+						{
+							if(g_Game.GetVSTConfig().Get_script_logging() == 1)
+								Print("[vStorage] Item "+item.itemName+" "+new_item+" created on ground.");
+						}
+						
 					}
 				}
 			}
 		} else {
 			if(ntarget.IsWeapon() && item.itemType == "magazine") {
+				
+				if(g_Game.GetVSTConfig().Get_script_logging() == 1)
+					Print("[vStorage] Item "+item.itemName+" "+new_item+" is Magazine, parent is weapon.");
+				
 				Weapon_Base weapon = Weapon_Base.Cast(ntarget);
+				
+				
 				weapon.SpawnAmmo( item.itemName, 0 );
 				
 				array<EntityAI> items = new array<EntityAI>;
@@ -841,7 +965,7 @@ class tofu_vstorage_barrel: Barrel_Red {
 				int count = items.Count();
 				for (int i = 0; i < count; i++)
 				{
-					EntityAI item_in_storage = items.Get(i);
+					ItemBase item_in_storage = ItemBase.Cast(items.Get(i));
 					if (item_in_storage)
 					{
 						Magazine magazine_check = Magazine.Cast(item_in_storage);
@@ -869,19 +993,12 @@ class tofu_vstorage_barrel: Barrel_Red {
 							
 							ItemBase mag_stats = ItemBase.Cast(item_in_storage);
 							
-							if(ntarget.GetType() != "tofu_vstorage_barrel_repair" && ntarget.GetType() != "tofu_vstorage_barrel_repair_1000")
-							{
-								mag_stats.SetHealth(item.itemHealth);
-							}
-							else
-							{
-								mag_stats.SetHealth(mag_stats.GetMaxHealth());
-							}
+							mag_stats.SetHealth(item.itemHealth);
 							
 							mag_stats.SetTemperature(item.itemTemp);
 							
-							if(ntarget.GetType() != "tofu_vstorage_barrel_drying" && ntarget.GetType() != "tofu_vstorage_barrel_drying_1000")
-								mag_stats.SetWet(item.itemWetness);
+							
+							mag_stats.SetWet(item.itemWetness);
 						}
 					}
 				}
@@ -890,7 +1007,7 @@ class tofu_vstorage_barrel: Barrel_Red {
 					new_item = ItemBase.Cast(ntarget.GetInventory().CreateAttachmentEx(item.itemName,item.itemSlotId));
 					Magazine magazine_check3 = Magazine.Cast(new_item);
 					Ammunition_Base ammo_check2 = Ammunition_Base.Cast(new_item);
-					if(new_item.IsMagazine() && !(ammo_check2 && ammo_check2.IsAmmoPile())) {
+					if(new_item && new_item.IsMagazine() && !(ammo_check2 && ammo_check2.IsAmmoPile())) {
 						magazine_check3.ServerSetAmmoCount(0);
 						
 						array<string> itemMagInhalt2 = item.itemMagInhalt;
@@ -913,19 +1030,14 @@ class tofu_vstorage_barrel: Barrel_Red {
 						
 						ItemBase mag_stats2 = ItemBase.Cast(new_item);
 						
-						if(ntarget.GetType() != "tofu_vstorage_barrel_repair" && ntarget.GetType() != "tofu_vstorage_barrel_repair_1000")
-						{
-							mag_stats2.SetHealth(item.itemHealth);
-						}
-						else
-						{
-							mag_stats2.SetHealth(mag_stats2.GetMaxHealth());
-						}
+						
+						mag_stats2.SetHealth(item.itemHealth);
+						
 						
 						mag_stats2.SetTemperature(item.itemTemp);
 						
-						if(ntarget.GetType() != "tofu_vstorage_barrel_drying" && ntarget.GetType() != "tofu_vstorage_barrel_drying_1000")
-							mag_stats2.SetWet(item.itemWetness);
+						
+						mag_stats2.SetWet(item.itemWetness);
 					}
 					
 				} else {
@@ -936,8 +1048,14 @@ class tofu_vstorage_barrel: Barrel_Red {
 		
 		if(new_item)
 		{
+			if(g_Game.GetVSTConfig().Get_script_logging() == 1)
+				Print("[vStorage] Item "+item.itemName+" "+new_item+" setting properties.");
+			
 			if(new_item.IsWeapon())
 			{
+				if(g_Game.GetVSTConfig().Get_script_logging() == 1)
+					Print("[vStorage] Item  "+item.itemName+" "+new_item+" is weapon.");
+				
 				//Print("Item is Weapon");
 				bool didChamberAction = false;
 				Weapon_Base wpn = Weapon_Base.Cast(new_item);
@@ -1061,24 +1179,97 @@ class tofu_vstorage_barrel: Barrel_Red {
 				new_item_food.ChangeFoodStage(item.itemFoodstage);
 			}
 
-			if(ntarget.GetType() != "tofu_vstorage_barrel_repair" && ntarget.GetType() != "tofu_vstorage_barrel_repair_1000")
-			{
-				new_item.SetHealth(item.itemHealth);
-			}
-			else
-			{
-				new_item.SetHealth(new_item.GetMaxHealth());
-			}
+			new_item.SetHealth(item.itemHealth);
+			
 			
 			new_item.SetTemperature(item.itemTemp);
 			
-			if(ntarget.GetType() != "tofu_vstorage_barrel_drying" && ntarget.GetType() != "tofu_vstorage_barrel_drying_1000")
-				new_item.SetWet(item.itemWetness);
+			
+			new_item.SetWet(item.itemWetness);
 			
 			foreach(tofuvStorageObj childitem : item.itemChildren) {
-				vrestore(childitem, new_item);
+				vrestore(childitem, new_item, player);
+			}
+		}
+		else
+		{
+			
+			if(!(ntarget.IsWeapon() && item.itemType == "magazine"))
+			{
+				Print("[vStorage] !!!!!!!!!!!!!! Failed creating item "+item.itemName+" :");
+				Print("[vStorage] DEBUG " + item.itemName + " in Parent " + ntarget.GetType());
+				Print("[vStorage] DEBUG " + item.itemIdx + " item.itemIdx ");
+				Print("[vStorage] DEBUG " + item.itemRow + " item.itemRow ");
+				Print("[vStorage] DEBUG " + item.itemCol + " item.itemCol ");
+				Print("[vStorage] DEBUG " + item.itemFliped + " item.itemFliped ");
+				itemFailed = true;
+				
+				if(player && player.GetIdentity())
+					g_Game.SendMessage(false,player.GetIdentity(),"WARNING", item.itemName+ " MIGHT NOT BE CREATED!",5,2,false,false,"",0,0);
+				
+				return false;
 			}
 		}
 		
+		return true;
+		
 	}
+	
+	void vrestore_drugexchange(tofuvStorageObj item, Object target_object)
+	{
+		
+		EntityAI ntarget = EntityAI.Cast( target_object );
+		ItemBase new_item;
+		vector position;
+		
+		auto objects = new array<Object>;
+		GetGame().GetObjectsAtPosition3D( target_object.GetPosition(), 2, objects, NULL );
+		foreach ( Object obj: objects ) {
+			if(obj.IsMan()) {
+				position = obj.GetPosition();
+				break;
+			}
+		}
+		
+		switch(item.itemName)
+		{
+			case "CP_CannabisSeedsPackSkunk":
+				new_item = ItemBase.Cast(GetGame().CreateObject("CP_CannabisBrickSkunk", position));
+			break;
+			
+			case "CP_CannabisSeedsPackBlue":
+				new_item = ItemBase.Cast(GetGame().CreateObject("CP_CannabisBrickBlue", position));
+			break;
+			
+			case "CP_CannabisSeedsPackKush":
+				new_item = ItemBase.Cast(GetGame().CreateObject("CP_CannabisBrickKush", position));
+			break;
+			
+			case "CP_CannabisSeedsPackStardawg":
+				new_item = ItemBase.Cast(GetGame().CreateObject("CP_CannabisBrickStardawg", position));
+			break;
+			
+			case "CP_CannabisSeedsPackFuture":
+				new_item = ItemBase.Cast(GetGame().CreateObject("CP_CannabisBrickFuture", position));
+			break;
+			
+			case "CP_CannabisSeedsPackS1":
+				new_item = ItemBase.Cast(GetGame().CreateObject("CP_CannabisBrickS1", position));
+			break;
+			
+			case "CP_CannabisSeedsPackNomad":
+				new_item = ItemBase.Cast(GetGame().CreateObject("CP_CannabisBrickNomad", position));
+			break;
+			
+			case "CP_CannabisSeedsPackBlackFrost":
+				new_item = ItemBase.Cast(GetGame().CreateObject("CP_CannabisBrickBlackFrost", position));
+			break;
+			
+			case "DP_CocaSeedsPack":
+				new_item = ItemBase.Cast(GetGame().CreateObject("DP_CocaBrick", position));
+			break;
+			
+		}
+	}
+	
 };
