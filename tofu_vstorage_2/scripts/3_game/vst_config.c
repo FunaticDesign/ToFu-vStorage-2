@@ -4,6 +4,8 @@ class VST_Config
 	static const string CONFIG_ROOT = "$profile:ToFuVStorage/";
     static const string FULLPATH = "$profile:ToFuVStorage/VST_Config.json";
 	
+	protected int script_logging = 0;
+	
 	protected int auto_close_random_seconds_min = 120;
 	protected int auto_close_random_seconds_max = 240;
 
@@ -45,7 +47,9 @@ class VST_Config
 	protected void Default()
     {
 		
-        auto_close_random_seconds_min = 120;
+		script_logging = 0;
+        
+		auto_close_random_seconds_min = 120;
 		auto_close_random_seconds_max = 240;
 		
 		Blacklist = new array<string>;
@@ -81,6 +85,11 @@ class VST_Config
 		return Admins;
 	}
 
+	int Get_script_logging()
+	{
+		return script_logging;
+	}
+	
 	int Get_auto_close_random_seconds_min()
 	{
 		return auto_close_random_seconds_min;
